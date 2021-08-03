@@ -506,7 +506,7 @@ class VaDEFullMLP(VaDEConvMLP):
             else:
                 return f.view(-1, self.input_size)
         else:
-            y_samples = torch.tensor(np.eye(self.num_components, dtype=np.float32))
+            y_samples = torch.tensor(np.eye(self.num_components, dtype=np.float32)).to(config.device)
             loc = y_samples @ self.mu_p_z.permute(1,0)
             scale = y_samples @ torch.exp(0.5 * self.log_sigma_square_p_z).permute(1, 0)
             pz_y = dist.Normal(loc=loc, scale=scale)
@@ -515,7 +515,7 @@ class VaDEFullMLP(VaDEConvMLP):
             f = self.decode(z_samples)
             if self.dataset == 'MNIST':
                 f = torch.sigmoid(f).view(n_sample, -1, self.input_size)
-                output = torch.zeros(f.shape)
+                output = torch.zeros(f.shape).to(config.device)
                 output[:,:,self.good_dims] = f[:,:,self.good_dims]
                 output -= 0.5
                 return output

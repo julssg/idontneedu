@@ -8,8 +8,8 @@ import numpy as np
 from typing import Any, Callable, Optional
 
 import torch
-from torchvision.datasets import MNIST, SVHN, FashionMNIST, CIFAR10
-
+from torchvision.datasets import MNIST, SVHN, FashionMNIST, CIFAR10, EMNIST
+ 
 
 def to_one_hot(x, m=None):
     "batch one hot"
@@ -83,6 +83,37 @@ def make_file(file_name):
 
 
 class Fast_MNIST(MNIST):
+    """
+    Source as modified from: https://gist.github.com/y0ast/f69966e308e549f013a92dc66debeeb4
+    """
+    def __init__(self, *args, **kwargs):
+        # deleting device key from kwargs (as cannot be passed to MNIST mother class)
+        device = kwargs['device']
+        del kwargs['device']
+        super().__init__(*args, **kwargs)
+
+        # Insert channel dim and scale data to [0,1]
+        self.data = self.data.unsqueeze(1).float().div(255)
+
+        # Normalize it with the usual MNIST mean and std
+        # self.data = self.data.sub_(0.1307).div_(0.3081)
+
+        # Put both data and targets on GPU in advance
+        self.data, self.targets = self.data.to(device), self.targets.to(device)
+
+    def __getitem__(self, index):
+        """
+        Args:
+            index (int): Index
+
+        Returns:
+            tuple: (image, target) where target is index of the target class.
+        """
+        img, target = self.data[index], self.targets[index]
+
+        return img, target
+
+class Fast_EMNIST(EMNIST):
     """
     Source as modified from: https://gist.github.com/y0ast/f69966e308e549f013a92dc66debeeb4
     """

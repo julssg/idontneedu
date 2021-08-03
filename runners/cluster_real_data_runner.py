@@ -11,11 +11,11 @@ import pandas as pd
 from sklearn.cross_decomposition import CCA
 from torch import optim
 from torch.utils.data import DataLoader
-from torchvision.datasets import MNIST, CIFAR10, SVHN
+from torchvision.datasets import MNIST, CIFAR10, SVHN, EMNIST
 import torchvision.utils as utils
 
 from data.utils import single_one_hot_encode, single_one_hot_encode_rev, get_good_dims, NaNinLoss
-from data.utils import Fast_CIFAR10, Fast_MNIST, Fast_Fashion_MNIST, Fast_SVHN
+from data.utils import Fast_CIFAR10, Fast_MNIST, Fast_EMNIST, Fast_Fashion_MNIST, Fast_SVHN
 from metrics.mcc import mean_corr_coef, mean_corr_coef_out_of_sample
 from metrics.acc import cluster_acc_and_conf_mat
 from models.nde import VaDEConvMLP, VaDEFullMLP, iVAEConvMLP, iVAEFullMLP, VaDEResNetMLP, iVAEResNetMLP
@@ -102,11 +102,22 @@ def get_dataset(args, config, test=False, one_hot=True, shuffle=True, on_gpu=Tru
             ])
     if test:
         on_gpu = False
+#     if config.data.dataset.lower().split('_')[0] == 'mnist':
+#         if on_gpu:
+#             dataset = Fast_MNIST(os.path.join(args.run, 'datasets'), train=not test, download=True, transform=transform, device=config.device)
+#         else:
+#             dataset = MNIST(os.path.join(args.run, 'datasets'), train=not test, download=True, transform=transform)
+#         if config.model.architecture == 'mlp' or config.model.architecture == 'resnet':
+#             # find good dims
+#             good_dims = get_good_dims(dataset.data.data.cpu().numpy().reshape(-1,784))
+#         else:
+#             good_dims = None
+            
     if config.data.dataset.lower().split('_')[0] == 'mnist':
         if on_gpu:
-            dataset = Fast_MNIST(os.path.join(args.run, 'datasets'), train=not test, download=True, transform=transform, device=config.device)
+            dataset = Fast_EMNIST(os.path.join(args.run, 'datasets'), split='digits', train=not test, download=True, transform=transform, device=config.device)
         else:
-            dataset = MNIST(os.path.join(args.run, 'datasets'), train=not test, download=True, transform=transform)
+            dataset = EMNIST(os.path.join(args.run, 'datasets'), split='digits', train=not test, download=True, transform=transform)
         if config.model.architecture == 'mlp' or config.model.architecture == 'resnet':
             # find good dims
             good_dims = get_good_dims(dataset.data.data.cpu().numpy().reshape(-1,784))
@@ -154,7 +165,7 @@ def train(args, config, conditional=True, return_elbo=False):
     # load dataset
     dataloader, dataset, cond_size, good_dims = get_dataset(args, config, one_hot=True)
     # define the deep generative model
-    model = get_dgm(args, config, good_dims)
+    model = get_dgm(args, config, good_dims).to(config.device)
 
     optimizer = get_optimizer(config, model.parameters())
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.8, patience=5, verbose=True)
