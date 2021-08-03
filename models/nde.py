@@ -463,6 +463,7 @@ class VaDEFullMLP(VaDEConvMLP):
     def __init__(self, config, good_dims):
         super().__init__(config)
         self.good_dims = good_dims
+        self.device = config.device
 
     def make_networks(self, config):
         print('making MLPs')
@@ -506,7 +507,7 @@ class VaDEFullMLP(VaDEConvMLP):
             else:
                 return f.view(-1, self.input_size)
         else:
-            y_samples = torch.tensor(np.eye(self.num_components, dtype=np.float32)).to(config.device)
+            y_samples = torch.tensor(np.eye(self.num_components, dtype=np.float32)).to(self.device)
             loc = y_samples @ self.mu_p_z.permute(1,0)
             scale = y_samples @ torch.exp(0.5 * self.log_sigma_square_p_z).permute(1, 0)
             pz_y = dist.Normal(loc=loc, scale=scale)
@@ -515,7 +516,7 @@ class VaDEFullMLP(VaDEConvMLP):
             f = self.decode(z_samples)
             if self.dataset == 'MNIST':
                 f = torch.sigmoid(f).view(n_sample, -1, self.input_size)
-                output = torch.zeros(f.shape).to(config.device)
+                output = torch.zeros(f.shape).to(self.device)
                 output[:,:,self.good_dims] = f[:,:,self.good_dims]
                 output -= 0.5
                 return output
