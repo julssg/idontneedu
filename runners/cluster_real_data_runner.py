@@ -8,7 +8,7 @@ import torchvision.transforms as transforms
 from matplotlib import pyplot as plt
 import pandas as pd
 
-from sklearn.cross_decomposition import CCA
+from sklearn.cross_decomposition import CCA, PLSCanonical
 from torch import optim
 from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST, CIFAR10, SVHN, EMNIST
@@ -538,6 +538,7 @@ def compute_mcc(args, config, cca_dim=20):
                 except:
                     print('no strong mcc obtainable')
                 try:
+                    # cca = PLSCanonical(n_components=cca_dim, max_iter=2500)
                     cca = CCA(n_components=cca_dim, max_iter=2500)
                     cca.fit(rep1[ii], rep2[ii])
                     res_out = cca.transform(rep1[iinot], rep2[iinot])
@@ -636,7 +637,7 @@ def plot_representation(args, config, cca_dim=20):
 
         sub_dfs = []
         chosen_method = "their_cca"
-        
+
         Model = "$\mathrm{Model}$"
         raw_Model = 'Model'
 
