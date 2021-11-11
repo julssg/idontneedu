@@ -524,6 +524,9 @@ def compute_mcc(args, config, cca_dim=20):
                 # cutoff = 50 if args.dataset == 'CIFAR100' else 5
                 # ii = np.where(res_cond[0]['lab'] < cutoff)[0]  # in sample points to learn from
                 # iinot = np.where(res_cond[0]['lab'] >= cutoff)[0]  # out of sample points
+                print(f"The length of val + test data is: {len(rep1)}.")
+
+                exit(1)
                 cutoff = int(len(rep1)/2)  # half the test dataset
                 ii = np.arange(cutoff)
                 iinot = np.arange(cutoff, 2 * cutoff)
