@@ -525,11 +525,9 @@ def compute_mcc(args, config, cca_dim=20):
                 # ii = np.where(res_cond[0]['lab'] < cutoff)[0]  # in sample points to learn from
                 # iinot = np.where(res_cond[0]['lab'] >= cutoff)[0]  # out of sample points
                 print(f"The length of val + test data is: {len(rep1)}.")
-
-                exit(1)
-                cutoff = int(len(rep1)/2)  # half the test dataset
+                cutoff = int(len(rep1)/4)  # half the test dataset
                 ii = np.arange(cutoff)
-                iinot = np.arange(cutoff, 2 * cutoff)
+                iinot = np.arange(cutoff, int(1.5 * cutoff))
 
                 try:
                     mcc_strong_out = mean_corr_coef_out_of_sample(x=rep1[ii], y=rep2[ii], x_test=rep1[iinot], y_test=rep2[iinot])
@@ -540,7 +538,7 @@ def compute_mcc(args, config, cca_dim=20):
                 except:
                     print('no strong mcc obtainable')
                 try:
-                    cca = CCA(n_components=cca_dim, max_iter=5000)
+                    cca = CCA(n_components=cca_dim, max_iter=2500)
                     cca.fit(rep1[ii], rep2[ii])
                     res_out = cca.transform(rep1[iinot], rep2[iinot])
                     mcc_weak_out = mean_corr_coef(res_out[0], res_out[1])
@@ -637,7 +635,8 @@ def plot_representation(args, config, cca_dim=20):
         # medianprops = dict(linewidth=2, color='firebrick')
 
         sub_dfs = []
-
+        chosen_method = "their_cca"
+        
         Model = "$\mathrm{Model}$"
         raw_Model = 'Model'
 
@@ -680,7 +679,7 @@ def plot_representation(args, config, cca_dim=20):
         file_name = 'representation_'
         if config.model.final_layer:
             file_name += str(config.model.feature_size) + '_'
-        plt.savefig(os.path.join(args.run, '{}{}_{}_cca_{}__.pdf'.format(file_name, args.dataset.lower(), ext, cca_dim)), bbox_inches="tight")
+        plt.savefig(os.path.join(args.run, '{}{}_{}_{}_{}__.pdf'.format(file_name, args.dataset.lower(), ext, chosen_method, cca_dim)), bbox_inches="tight")
 
     if 'vqvae' not in config.model.architecture.lower():
         # print some statistics
