@@ -507,6 +507,7 @@ def plot_recons(args, config, conditional=True):
 
 
 def compute_mcc(args, config, cca_dim=20):
+     
     isfile_rep1 = os.path.isfile(os.path.join(args.checkpoints, 'seed{}'.format(args.seed), 'test_representations.p'))
     isfile_rep2 = os.path.isfile(os.path.join(args.checkpoints, 'seed{}'.format(args.second_seed), 'test_representations.p'))
     
@@ -636,7 +637,7 @@ def plot_representation(args, config, cca_dim=20):
         # medianprops = dict(linewidth=2, color='firebrick')
 
         sub_dfs = []
-        chosen_method = "their_cca_dim20"
+        chosen_method = "PLScanonical"
 
         Model = "$\mathrm{Model}$"
         raw_Model = 'Model'
