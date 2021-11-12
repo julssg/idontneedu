@@ -509,7 +509,7 @@ def plot_recons(args, config, conditional=True):
 def compute_mcc(args, config, cca_dim=20):
     isfile_rep1 = os.path.isfile(os.path.join(args.checkpoints, 'seed{}'.format(args.seed), 'test_representations.p'))
     isfile_rep2 = os.path.isfile(os.path.join(args.checkpoints, 'seed{}'.format(args.second_seed), 'test_representations.p'))
-
+    
     if isfile_rep1 and isfile_rep2:
         rep1 = pickle.load(
             open(os.path.join(args.checkpoints, 'seed{}'.format(args.seed), 'test_representations.p'), 'rb'))['rep']
@@ -636,7 +636,7 @@ def plot_representation(args, config, cca_dim=20):
         # medianprops = dict(linewidth=2, color='firebrick')
 
         sub_dfs = []
-        chosen_method = "their_cca"
+        chosen_method = "their_cca_dim20"
 
         Model = "$\mathrm{Model}$"
         raw_Model = 'Model'
@@ -658,7 +658,7 @@ def plot_representation(args, config, cca_dim=20):
                               '$\mathrm{AE}$',
                               '$\mathrm{AE}$']           
 
-            list_of_forms = ['$\mathrm{Out}$ $\mathrm{of}$ $\mathrm{Sample}$', '$\mathrm{In}$ $\mathrm{Sample}$',
+        list_of_forms = ['$\mathrm{Out}$ $\mathrm{of}$ $\mathrm{Sample}$', '$\mathrm{In}$ $\mathrm{Sample}$',
                              '$\mathrm{Out}$ $\mathrm{of}$ $\mathrm{Sample}$', '$\mathrm{In}$ $\mathrm{Sample}$']
 
         for i in range(len(data)):

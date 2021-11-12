@@ -542,7 +542,7 @@ class iVAEConvMLP(nn.Module):
     def __init__(self, config):
         super().__init__()
 
-        device = config.device
+        self.device = device = config.device
         self.latent_dim = config.model.feature_size
         self.image_size = config.data.image_size
         self.n_channels = config.data.channels
@@ -598,6 +598,7 @@ class iVAEConvMLP(nn.Module):
     def prior(self, y):
         # h2 = F.relu(self.l1(y))
         # h2 = self.l1(y)
+        # y.to(self.device)
         return (self.mu_p_z @ y.T).T, (self.log_sigma_square_p_z @ y.T).exp().T
 
     # def prior(self, y):
@@ -654,7 +655,7 @@ class iVAEConvMLP(nn.Module):
         if self.dataset == 'MNIST' and good_dims is not None:
             x = x[:, good_dims]
 
-        u_oh = torch.zeros(u.shape[0], 10)
+        u_oh = torch.zeros(u.shape[0], 10).to(self.device)
         u_oh[range(u_oh.shape[0]), u] = 1
         prior_params = self.prior(u_oh)
 
@@ -690,6 +691,7 @@ class iVAEFullMLP(iVAEConvMLP):
     def __init__(self, config, good_dims):
         super().__init__(config)
         self.good_dims = good_dims
+        self.device = config.device
 
     def make_networks(self, config):
         self.encoder = FullMLPencoder(config)
@@ -706,7 +708,7 @@ class iVAEFullMLP(iVAEConvMLP):
         return self.encoder(x.view(-1, self.input_size))
 
     def sample(self, n_sample=1, per_comp=False):
-        y_samples = torch.tensor(np.eye(10, dtype=np.float32))
+        y_samples = torch.tensor(np.eye(10, dtype=np.float32)).to(self.device)
         loc = y_samples @ self.mu_p_z.permute(1,0)
         scale = y_samples @ torch.exp(self.log_sigma_square_p_z).permute(1, 0)
         pz_y = dist.Normal(loc=loc, scale=scale)
@@ -715,7 +717,7 @@ class iVAEFullMLP(iVAEConvMLP):
         f = self.decode(z_samples)
         if self.dataset == 'MNIST':
             f = torch.sigmoid(f).view(n_sample, -1, self.input_size)
-            output = torch.zeros(f.shape)
+            output = torch.zeros(f.shape).to(self.device)
             output[:,:,self.good_dims] = f[:,:,self.good_dims]
             output -= 0.5
             return output
